@@ -22,5 +22,7 @@ df = dcmtag2table(folder, list_of_tags)
 To generate new UIDs for each unique UID ("StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID"):
 
 ```
+from dcmtag2table import replace_uids
+
 df_out = replace_uids(df)
 ```
