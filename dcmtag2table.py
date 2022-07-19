@@ -56,3 +56,32 @@ def dcmtag2table(folder, list_of_tags):
     time.sleep(2)
     print("Finished.")
     return df
+
+def replace_uids(df_in: pd.DataFrame, prefix = '1.2.840.1234.') -> pd.DataFrame:
+    """
+    # Maps the StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID
+    # in a Pandas DataFrame with newly generated UIDs taking into account the 
+    # Study/Series/SOP hierarchy. 
+    # New columns with "Fake" prefix are created.
+
+    # Parameters:
+    #    df_in (Pandas DataFrame): DataFrame containing the three columns of UIDs
+    #    prefix (str): string containing your particular prefix.
+
+    # Returns:
+    #    df (DataFrame): with three new columns containing the new UIDs
+    """
+    start = time.time()
+    df = df_in.copy()
+    
+    list_of_tags = ["StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID" ]
+
+    for _tag in list_of_tags:
+        print("Reassigning " + _tag)
+        if _tag not in df.columns:
+            raise Exception('Tags StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID must be columns of the DataFrame')
+        time.sleep(0.2)
+        for _UID in tqdm(df[_tag].unique()):
+            df.loc[df[_tag] == _UID, "Fake" + _tag] = pydicom.uid.generate_uid(prefix=prefix)
+    print("Time: " + str(time.time() - start))
+    return df
