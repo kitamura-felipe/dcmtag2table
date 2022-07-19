@@ -24,5 +24,5 @@ To generate new UIDs for each unique UID ("StudyInstanceUID", "SeriesInstanceUID
 ```
 from dcmtag2table import replace_uids
 
-df_out = replace_uids(df)
+df_out = replace_uids(df, prefix='your prefix here') # Example of prefix: "1.2.840.12345."
 ```
