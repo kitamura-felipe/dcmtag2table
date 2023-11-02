@@ -24,10 +24,10 @@ folder = "/media/felipe/easystore/Datasets/RSNA2019/mdai/epm/"
 df = dcmtag2table(folder, list_of_tags)
 
 #Select only CTs
-df = df[df[Modality] == "CT"]
+df = df[df["Modality"] == "CT"]
 
 #Select only images with Slice Thickness of 1.0 mm or less
-df = df[df[SliceThickness] <= 1.0]
+df = df[df["SliceThickness"] <= 1.0]
 
 ```
 
