@@ -3,7 +3,7 @@ Code to generate a Pandas DataFrame with a custom list DICOM tags from a folder 
 
 ## Usage
 
-```
+```python
 #Import package to read metadata from DICOM files
 from dcmtag2table import dcmtag2table
 
@@ -33,7 +33,7 @@ df = df[df[SliceThickness] <= 1.0]
 
 To generate new UIDs for each unique UID ("StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID"):
 
-```
+```python
 from dcmtag2table import replace_uids
 
 df_out = replace_uids(df, prefix='your prefix here') # Example of prefix: "1.2.840.12345."
