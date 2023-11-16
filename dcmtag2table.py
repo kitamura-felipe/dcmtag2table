@@ -85,3 +85,24 @@ def replace_uids(df_in: pd.DataFrame, prefix = '1.2.840.1234.') -> pd.DataFrame:
             df.loc[df[_tag] == _UID, "Fake" + _tag] = pydicom.uid.generate_uid(prefix=prefix)
     print("Time: " + str(time.time() - start))
     return df
+
+def age_string_to_int(age_str):
+    """
+    Convert an age string of format "NNL" to an integer.
+    If 'L' is 'Y', remove it. If 'L' is any other letter, return 0.
+    If 'L' is not present, return the number as is.
+    
+    :param age_str: Age in string format
+    :return: Age as an integer
+    """
+    # Check if the last character is a letter
+    if age_str[-1].isalpha():
+        # If the letter is 'Y', remove it and convert to int
+        if age_str[-1].upper() == 'Y':
+            return int(age_str[:-1])
+        # If the letter is not 'Y', return 0
+        else:
+            return 0
+    # If the last character is not a letter, convert the whole string to int
+    else:
+        return int(age_str)
