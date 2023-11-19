@@ -1,6 +1,8 @@
 # dcmtag2table
-Code to generate a Pandas DataFrame with a custom list DICOM tags from a folder containing DICOM files.
-It can be used to perform series selection, generation of new UIDs, and dumping of unique values of DICOM tags to expedite manual PHI check.
+Code to generate a Pandas DataFrame with a custom list of DICOM tags from a folder containing DICOM files.
+It can be used to perform series selection, generation of new UIDs, and dumping of unique values of DICOM tags to expedite manual PHI checks.
+
+Thanks to Errol Colak for envisioning the algorithm to dump unique values. 
 
 ## Usage
 
