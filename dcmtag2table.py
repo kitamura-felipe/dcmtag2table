@@ -117,33 +117,40 @@ def list_files_in_directory(directory: str) -> Set[str]:
     :return: A set of file paths.
     """
     file_paths = set()
-    for root, _, files in os.walk(directory):
+    for root, _, files in tqdm(os.walk(directory)):
         for file in files:
             file_paths.add(os.path.join(root, file))
     return file_paths
 
-def read_dicom_tags(file_paths: Set[str]) -> Set[str]:
+def process_element(element, tag_values):
     """
-    Read DICOM tags from the given file paths and accumulate their values.
+    Process an individual DICOM element.
+    If the element is a sequence, process each item recursively.
+    Otherwise, add the tag and its value to the set.
+    """
+    if element.VR == "SQ":  # Sequence of items
+        for item in element:
+            if "PixelData" in item:
+                del item.PixelData
+            for sub_element in item.iterall():
+                process_element(sub_element, tag_values)
+    else:
+        
+        tag_values.add(f"{element.value}")
 
-    :param file_paths: Set of file paths to process.
-    :return: A set of DICOM tag values.
+def iterate_dicom_tags(file_paths: list) -> Set:
+    """
+    Iterate over all DICOM tags in a given file, including sequences and nested sequences.
     """
     tag_values = set()
+    for file_path in tqdm(file_paths):
+        dicom_file = pydicom.dcmread(file_path)
+        if "PixelData" in dicom_file:
+            del dicom_file.PixelData
+        for element in dicom_file.iterall():
+            process_element(element, tag_values)
 
-    for file_path in file_paths:
-        try:
-            dicom_file = pydicom.dcmread(file_path)
-            for tag in dicom_file.dir():
-                try:
-                    value = getattr(dicom_file, tag)
-                    tag_values.add(f"{value}")
-                except AttributeError:
-                    pass  # Skip if the attribute is not present
-        except pydicom.errors.InvalidDicomError:
-            pass  # Skip non-DICOM files
-
-    return tag_values
+    return sorted(tag_values)
 
 def save_set_to_file(data: Set[str], file_name: str):
     """
@@ -157,7 +164,8 @@ def save_set_to_file(data: Set[str], file_name: str):
             file.write(f"{item}\n")
 
 def dump_unique_values(directory: str):
+    print("Listing files")
     file_paths = list_files_in_directory(directory)
-    dicom_tags = read_dicom_tags(file_paths)
+    print("Reading DICOM tags")
+    dicom_tags = iterate_dicom_tags(file_paths)
     save_set_to_file(dicom_tags, "unique_values.txt")
-
