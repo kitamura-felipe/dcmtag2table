@@ -31,6 +31,15 @@ df = df[df["SliceThickness"] <= 1.0]
 
 ```
 
+To dump unique values from DICOM tags:
+
+```python
+from dcmtag2table import dump_unique_values
+
+dump_unique_values('/mnt/d/exames/HeadCT/')
+
+```
+
 To generate new UIDs for each unique UID ("StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID"):
 
 ```python
