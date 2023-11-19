@@ -3,6 +3,7 @@ from tqdm import tqdm
 import pandas as pd
 import os
 import time
+from typing import Set
 
 def dcmtag2table(folder, list_of_tags):
     """
@@ -106,3 +107,57 @@ def age_string_to_int(age_str):
     # If the last character is not a letter, convert the whole string to int
     else:
         return int(age_str)
+
+
+def list_files_in_directory(directory: str) -> Set[str]:
+    """
+    List all files in a directory and its subdirectories.
+    
+    :param directory: The directory to search for files.
+    :return: A set of file paths.
+    """
+    file_paths = set()
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_paths.add(os.path.join(root, file))
+    return file_paths
+
+def read_dicom_tags(file_paths: Set[str]) -> Set[str]:
+    """
+    Read DICOM tags from the given file paths and accumulate their values.
+
+    :param file_paths: Set of file paths to process.
+    :return: A set of DICOM tag values.
+    """
+    tag_values = set()
+
+    for file_path in file_paths:
+        try:
+            dicom_file = pydicom.dcmread(file_path)
+            for tag in dicom_file.dir():
+                try:
+                    value = getattr(dicom_file, tag)
+                    tag_values.add(f"{value}")
+                except AttributeError:
+                    pass  # Skip if the attribute is not present
+        except pydicom.errors.InvalidDicomError:
+            pass  # Skip non-DICOM files
+
+    return tag_values
+
+def save_set_to_file(data: Set[str], file_name: str):
+    """
+    Save the elements of a set to a file, each on a new line.
+
+    :param data: Set of data to be saved.
+    :param file_name: Name of the file to save the data.
+    """
+    with open(file_name, 'w') as file:
+        for item in data:
+            file.write(f"{item}\n")
+
+def dump_unique_values(directory: str):
+    file_paths = list_files_in_directory(directory)
+    dicom_tags = read_dicom_tags(file_paths)
+    save_set_to_file(dicom_tags, "unique_values.txt")
+
