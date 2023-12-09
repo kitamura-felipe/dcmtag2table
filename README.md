@@ -67,3 +67,17 @@ filtered_df = remove_if_tag_contains(df, 'SeriesDescription', list2remove)
 print(filtered_df)
 ```
 
+
+The `copy_files` function is designed to automate the process of copying files from one location to another, with the ability to modify a part of the directory path during the copy. This can be particularly useful for organizing files into different directories based on certain criteria. After filtering the DataFrame with the function above, you can create a copy of the dataset only with the desired files. Here's a simple usage example:
+
+```python
+from dcmtag2table import copy_files
+
+# Specify the folder name to replace in the path
+folder2replace = 'dataset1'
+
+# Usage of copy_files
+copy_files(df, 'Filename', folder2replace)
+
+# This will copy files to paths like '/data/dataset1_filtered/study1/series1/image1.dcm', etc.
+```
