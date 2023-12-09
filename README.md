@@ -50,3 +50,20 @@ from dcmtag2table import replace_uids
 
 df_out = replace_uids(df, prefix='your prefix here') # Example of prefix: "1.2.840.12345."
 ```
+
+The `remove_if_tag_contains` function can be particularly useful for filtering DICOM datasets based on the values of specific DICOM tags. This function allows you to remove rows from a DataFrame where a specified DICOM tag column contains any of the substrings from a given list, which is helpful in cleaning or organizing DICOM data. Here's an example:
+
+```python
+from dcmtag2table import remove_if_tag_contains
+
+# Substrings to remove - Series Description that contains 'T1' or 'T2'
+list2remove = ['T1', 'T1']
+
+# Usage of remove_if_tag_contains
+# Assuming 'SeriesDescription' is the DICOM tag we're interested in
+filtered_df = remove_if_tag_contains(df, 'SeriesDescription', list2remove)
+
+# Display the filtered DataFrame
+print(filtered_df)
+```
+
