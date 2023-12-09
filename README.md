@@ -57,7 +57,7 @@ The `remove_if_tag_contains` function can be particularly useful for filtering D
 from dcmtag2table import remove_if_tag_contains
 
 # Substrings to remove - Series Description that contains 'T1' or 'T2'
-list2remove = ['T1', 'T1']
+list2remove = ['T1', 'T2']
 
 # Usage of remove_if_tag_contains
 # Assuming 'SeriesDescription' is the DICOM tag we're interested in
