@@ -81,3 +81,32 @@ copy_files(df, 'Filename', folder2replace)
 
 # This will copy files to paths like '/data/dataset1_filtered/study1/series1/image1.dcm', etc.
 ```
+
+The `get_metrics` function is designed to automate the process of summarizing the number of files, patients, studies, series, and total byte size of a dataset. Here's a simple usage example:
+
+```python
+from dcmtag2table import get_metrics
+
+# Specify the folder namewhere the DICOM files are saved.
+folder = 'dataset1'
+
+# Usage of get_metrics
+get_metrics(folder, "")
+
+# This will generate a dictionary as output.
+
+Output:
+
+{'Number of files': 1000,
+ 'Batch Size Bytes': 526754688,
+ 'Number of patients': 1,
+ 'Number of studies': 1,
+ 'Number of series': 8,
+ 'Number of MRs': 0,
+ 'Number of CTs': 1,
+ 'Number of USs': 0,
+ 'Number of CRs': 0,
+ 'Number of DXs': 0,
+ 'Percentage of male': 1.0}
+
+```
