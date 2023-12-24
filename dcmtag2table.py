@@ -45,12 +45,11 @@ def dcmtag2table(folder, list_of_tags):
             table.append((items))
         except:
             print("Skipping non-DICOM: " + _f)
-
-            
+      
     list_of_tags.insert(0, "Filename")
     test = list(map(list, zip(*table)))
     dictone = {}
-
+    
     for i, _tag in enumerate (list_of_tags):
         dictone[_tag] = test[i]
 
@@ -220,3 +219,40 @@ def remove_if_tag_contains(df, tag: str, list2remove: list):
     for _substring in list2remove:
         df = df[~df[tag].str.contains(_substring, case=False)]
     return df
+
+def get_folder_size(path):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(path):
+        for f in tqdm(filenames):
+            fp = os.path.join(dirpath, f)
+            if os.path.exists(fp):
+                total_size += os.path.getsize(fp)
+    return total_size
+    
+def get_metrics(folder: str, output_file: str):
+    list_of_tags = [
+                "PatientID",
+                "StudyInstanceUID",
+                "SeriesInstanceUID",
+                "SOPInstanceUID",
+                "Modality",
+                "PatientSex",
+                "PatientAge"
+                ]
+    df = dcmtag2table(folder, list_of_tags)
+
+    summary = {
+        "Number of files": len(df),
+        "Batch Size Bytes": get_folder_size(folder),
+        "Number of patients": len(df['PatientID'].unique()),
+        "Number of studies": len(df['StudyInstanceUID'].unique()),
+        "Number of series": len(df['SeriesInstanceUID'].unique()),
+        "Number of MRs": len(df.drop_duplicates('StudyInstanceUID')[df.drop_duplicates('StudyInstanceUID')['Modality'] == 'MR']),
+        "Number of CTs": len(df.drop_duplicates('StudyInstanceUID')[df.drop_duplicates('StudyInstanceUID')['Modality'] == 'CT']),
+        "Number of USs": len(df.drop_duplicates('StudyInstanceUID')[df.drop_duplicates('StudyInstanceUID')['Modality'] == 'US']),
+        "Number of CRs": len(df.drop_duplicates('StudyInstanceUID')[df.drop_duplicates('StudyInstanceUID')['Modality'] == 'CR']),
+        "Number of DXs": len(df.drop_duplicates('StudyInstanceUID')[df.drop_duplicates('StudyInstanceUID')['Modality'] == 'DX']),
+        "Percentage of male": len(df.drop_duplicates('PatientID')[df.drop_duplicates('PatientID')['PatientSex'] == 'M']) / len(df.drop_duplicates('PatientID')),
+    }
+
+    return summary
