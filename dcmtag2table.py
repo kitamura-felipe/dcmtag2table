@@ -5,6 +5,7 @@ import os
 import shutil
 import time
 from typing import Set
+from datetime import datetime
 
 def dcmtag2table(folder, list_of_tags):
     """
@@ -228,6 +229,23 @@ def get_folder_size(path):
             if os.path.exists(fp):
                 total_size += os.path.getsize(fp)
     return total_size
+
+def append_to_csv(file_path, data_dict):
+    # Create a DataFrame from the dictionary
+    new_row = pd.DataFrame([data_dict])
+
+    # Check if the file exists
+    if os.path.exists(file_path):
+        # Read existing data
+        df = pd.read_csv(file_path)
+        # Concatenate the new data
+        df = pd.concat([df, new_row], ignore_index=True)
+    else:
+        # Use the new row as the DataFrame
+        df = new_row
+    
+    # Save to CSV
+    df.to_csv(file_path, index=False)
     
 def get_metrics(folder: str, output_file: str):
     list_of_tags = [
@@ -242,6 +260,7 @@ def get_metrics(folder: str, output_file: str):
     df = dcmtag2table(folder, list_of_tags)
 
     summary = {
+        "Timestamp": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
         "Number of files": len(df),
         "Batch Size Bytes": get_folder_size(folder),
         "Number of patients": len(df['PatientID'].unique()),
@@ -254,5 +273,6 @@ def get_metrics(folder: str, output_file: str):
         "Number of DXs": len(df.drop_duplicates('StudyInstanceUID')[df.drop_duplicates('StudyInstanceUID')['Modality'] == 'DX']),
         "Percentage of male": len(df.drop_duplicates('PatientID')[df.drop_duplicates('PatientID')['PatientSex'] == 'M']) / len(df.drop_duplicates('PatientID')),
     }
-
+    append_to_csv('transfer_logs.csv', summary)
     return summary
+
