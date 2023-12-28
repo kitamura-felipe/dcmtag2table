@@ -87,17 +87,18 @@ The `get_metrics` function is designed to automate the process of summarizing th
 ```python
 from dcmtag2table import get_metrics
 
-# Specify the folder namewhere the DICOM files are saved.
+# Specify the folder namevwhere the DICOM files are saved.
 folder = 'dataset1'
 
 # Usage of get_metrics
 get_metrics(folder, "")
 
-# This will generate a dictionary as output.
+# This will generate a dictionary as output. It will also append the dictionary to transfer_logs.csv.
 
 Output:
 
-{'Number of files': 1000,
+{'Timestamp': '12/28/2023, 07:07:40',
+ 'Number of files': 1000,
  'Batch Size Bytes': 526754688,
  'Number of patients': 1,
  'Number of studies': 1,
