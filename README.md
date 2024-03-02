@@ -51,6 +51,14 @@ from dcmtag2table import replace_uids
 df_out = replace_uids(df, prefix='your prefix here') # Example of prefix: "1.2.840.12345."
 ```
 
+To generate new IDs (PatientID, StudyID, and AccessionNumber) and UIDs for each unique UID ("StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID"):
+
+```python
+from dcmtag2table import replace_ids
+
+df_out = replace_uids(df, prefix='your prefix here', start_pct=1, start_study=1) # Example of prefix: "1.2.840.12345."
+```
+
 The `remove_if_tag_contains` function can be particularly useful for filtering DICOM datasets based on the values of specific DICOM tags. This function allows you to remove rows from a DataFrame where a specified DICOM tag column contains any of the substrings from a given list, which is helpful in cleaning or organizing DICOM data. Here's an example:
 
 ```python
