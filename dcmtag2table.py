@@ -151,7 +151,27 @@ def replace_ids(df_in: pd.DataFrame, prefix: str, start_pct=1, start_study=1) ->
     return df
 
 def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, start_study=1):
+    """
+    Processes DICOM files to anonymize and retain only a specified list of tags, saving the modified files to a new location.
 
+    This function reads DICOM files from a specified input path, anonymizes patient and study identifiers, and creates new DICOM files that include only a predefined list of DICOM tags, along with newly anonymized tags. The new files are saved to a specified output path, organized by StudyID.
+
+    Parameters:
+    - in_path (str): The file path to the directory containing the original DICOM files.
+    - out_path (str): The file path to the directory where the modified DICOM files will be saved.
+    - list_of_tags (list): A list of DICOM tags that should be retained in the new DICOM files.
+    - start_pct (int, optional): Starting value for the pseudonymization counter for PatientID and PatientName. Defaults to 1.
+    - start_study (int, optional): Starting value for the pseudonymization counter for StudyID and AccessionNumber. Defaults to 1.
+
+    Returns:
+    - DataFrame: A pandas DataFrame containing the mappings between original and fake identifiers for all processed DICOM files.
+
+    Note:
+    The function uses `dcmtag2table` to extract specified DICOM tags into a DataFrame and `replace_ids` to anonymize identifiers. It requires `pydicom` for DICOM file handling and `os` for file path operations. Progress is tracked using `tqdm`.
+
+    The anonymization process assigns new values to PatientID, PatientName, StudyID, AccessionNumber, StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID, while retaining specified clinical tags. Certain fixed values are assigned to PatientBirthDate, PatientSex, PatientAge, and StudyDate, StudyTime, and the ProtocolName is cleared.
+    """
+    
     phi_dicom_tags = [
         'PatientID',             # Unique identifier for the patient
         'PatientName',           # Name of the patient
@@ -177,7 +197,6 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
     for index, row in tqdm(df.iterrows(), total=len(df)):
         original_file_path = row['Filename']
         
-        #try:
         # Read the original DICOM file
         original_ds = pydicom.dcmread(original_file_path, force=True)
         #print(original_ds.file_meta)
@@ -220,11 +239,6 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         
         # Save the new DICOM file
         new_ds.save_as(new_file_path)
-        
-        #print(f"File saved: {new_file_path}")
-            
-        #except Exception as e:
-        #    print(f"Error processing {original_file_path}: {e}")
             
     return df
     
