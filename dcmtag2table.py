@@ -1,11 +1,16 @@
 import pydicom
-from tqdm import tqdm
+from tqdm import tqdm, tqdm_notebook
 import pandas as pd
 import os
 import shutil
 import time
 from typing import Set
 from datetime import datetime
+
+from pydicom import Dataset
+from pydicom.dataset import FileMetaDataset
+import time
+
 
 def dcmtag2table(folder, list_of_tags):
     """
@@ -33,7 +38,7 @@ def dcmtag2table(folder, list_of_tags):
     time.sleep(2)
     for _f in tqdm(filelist):
         try:
-            ds = pydicom.dcmread(_f, stop_before_pixels=True)
+            ds = pydicom.dcmread(_f, stop_before_pixels=True, force=True)
             items = []
             items.append(_f)
 
@@ -84,10 +89,145 @@ def replace_uids(df_in: pd.DataFrame, prefix = '1.2.840.1234.') -> pd.DataFrame:
             raise Exception('Tags StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID must be columns of the DataFrame')
         time.sleep(0.2)
         for _UID in tqdm(df[_tag].unique()):
-            df.loc[df[_tag] == _UID, "Fake" + _tag] = pydicom.uid.generate_uid(prefix=prefix)
+            df.loc[df[_tag] == _UID, "fake" + _tag] = pydicom.uid.generate_uid(prefix=prefix)
     print("Time: " + str(time.time() - start))
     return df
 
+def replace_ids(df_in: pd.DataFrame, prefix: str, start_pct=1, start_study=1) -> pd.DataFrame:
+    """
+    # Maps the PatientID, StudyID
+    # in a Pandas DataFrame with newly generated IDs taking into account the 
+    # Patient/Study/Series/SOP hierarchy. 
+    # New columns with "Fake" prefix are created.
+
+    # Parameters:
+    #    df_in (Pandas DataFrame): DataFrame containing the three columns of UIDs
+    #    prefix (str): string containing your particular prefix.
+
+    # Returns:
+    #    df (DataFrame): with three new columns containing the new UIDs
+    """
+    start = time.time()
+    df = df_in.copy()
+    
+    list_of_tags = ["StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID" ]
+
+    for _tag in list_of_tags:
+        print("Reassigning " + _tag)
+        if _tag not in df.columns:
+            raise Exception('Tags StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID must be columns of the DataFrame')
+        time.sleep(0.2)
+        for _UID in tqdm(df[_tag].unique()):
+            df.loc[df[_tag] == _UID, "fake_" + _tag] = pydicom.uid.generate_uid(prefix=prefix)
+
+    list_of_tags = ["PatientID", "StudyID", "AccessionNumber" ]
+
+    for _tag in list_of_tags:
+        print("Reassigning " + _tag)
+        if _tag not in df.columns:
+            raise Exception('Tags PatientID, StudyID, AccessionNumber must be columns of the DataFrame')
+        time.sleep(0.2)
+        
+        if _tag == "PatientID":
+            counter = start_pct
+            for _UID in df[_tag].unique():
+                df.loc[df[_tag] == _UID, "fake_" + _tag] = counter
+                counter += 1
+        else:
+            counter = start_study
+            for _UID in df["StudyInstanceUID"].unique():
+                df.loc[df["StudyInstanceUID"] == _UID, "fake_" + _tag] = counter
+                counter += 1        
+
+
+        if _tag == "PatientID":
+            last_patient = counter
+        elif _tag == "StudyID":
+            last_study = counter
+            
+    print("Time: " + str(time.time() - start))
+    print("Last Patient: " + str(last_patient))
+    print("Last Study: " + str(last_study))
+    return df
+
+def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, start_study=1):
+
+    phi_dicom_tags = [
+        'PatientID',             # Unique identifier for the patient
+        'PatientName',           # Name of the patient
+        'PatientBirthDate',      # Birth date of the patient
+        'PatientSex',            # Sex of the patient
+        'PatientAge',
+        'ReferringPhysicianName',# Name of the referring physician
+        'StudyID',               # ID of the study
+        'AccessionNumber',
+        'DeviceSerialNumber',    # Serial number of the device
+        'StudyInstanceUID',      # Unique identifier for the study
+        'StudyDate',             # Date of study initiation
+        'StudyTime',             # Time of study initiation
+        'SeriesInstanceUID',     # Unique identifier for the series
+        'SOPInstanceUID',     # Unique identifier for the series
+        'ProtocolName',          # Name of the protocol used for the series
+    ]
+
+    df = dcmtag2table(in_path, phi_dicom_tags)
+
+    df = replace_ids(df, prefix="1.2.840.12345.", start_pct=start_pct, start_study=start_study)
+
+    for index, row in tqdm(df.iterrows(), total=len(df)):
+        original_file_path = row['Filename']
+        
+        #try:
+        # Read the original DICOM file
+        original_ds = pydicom.dcmread(original_file_path, force=True)
+        #print(original_ds.file_meta)
+
+        
+        # Create a new DICOM dataset
+        new_ds = Dataset()
+        new_ds.file_meta = FileMetaDataset()
+        new_ds.file_meta.TransferSyntaxUID = original_ds.file_meta.TransferSyntaxUID
+        
+        # Copy only the predefined tags from the original to the new dataset
+        for tag in list_of_tags:
+            if tag in original_ds:
+                new_ds.add(original_ds[tag])
+
+
+        new_ds.PatientID = str(int(row['fake_PatientID'])).zfill(6)
+        new_ds.PatientName = str(int(row['fake_PatientID'])).zfill(6)
+        new_ds.PatientBirthDate = "08/28/1919"
+        new_ds.PatientSex = row['PatientSex']
+        new_ds.PatientAge = row['PatientAge']
+        new_ds.StudyID = str(int(row['fake_AccessionNumber'])).zfill(6)
+        new_ds.AccessionNumber = str(int(row['fake_AccessionNumber'])).zfill(6)
+        new_ds.StudyInstanceUID = row['fake_StudyInstanceUID']
+        new_ds.SeriesInstanceUID = row['fake_SeriesInstanceUID']
+        new_ds.SOPInstanceUID = row['fake_SOPInstanceUID']
+        new_ds.file_meta.MediaStorageSOPInstanceUID = original_ds.file_meta.MediaStorageSOPInstanceUID
+        new_ds.ProtocolName = ""
+        new_ds.StudyDate = "02/28/2024"
+        new_ds.StudyTime = "00:00:00"
+
+        
+        
+        # Construct the new file path based on StudyID
+
+        new_file_path = os.path.join(out_path, new_ds['StudyID'].value, new_ds['SOPInstanceUID'].value + ".dcm")
+        
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
+        
+        # Save the new DICOM file
+        new_ds.save_as(new_file_path)
+        
+        #print(f"File saved: {new_file_path}")
+            
+        #except Exception as e:
+        #    print(f"Error processing {original_file_path}: {e}")
+            
+    return df
+    
 def age_string_to_int(age_str):
     """
     Convert an age string of format "NNL" to an integer.
@@ -145,7 +285,7 @@ def iterate_dicom_tags(file_paths: list) -> Set:
     """
     tag_values = set()
     for file_path in tqdm(file_paths):
-        dicom_file = pydicom.dcmread(file_path)
+        dicom_file = pydicom.dcmread(file_path, force=True)
         if "PixelData" in dicom_file:
             del dicom_file.PixelData
         for element in dicom_file.iterall():
@@ -273,6 +413,6 @@ def get_metrics(folder: str, output_file: str):
         "Number of DXs": len(df.drop_duplicates('StudyInstanceUID')[df.drop_duplicates('StudyInstanceUID')['Modality'] == 'DX']),
         "Percentage of male": len(df.drop_duplicates('PatientID')[df.drop_duplicates('PatientID')['PatientSex'] == 'M']) / len(df.drop_duplicates('PatientID')),
     }
-    append_to_csv('transfer_logs.csv', summary)
+    append_to_csv(output_file, summary)
     return summary
 
