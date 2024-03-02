@@ -34,6 +34,61 @@ df = df[df["SliceThickness"] <= 1.0]
 
 ```
 
+To pseudonimize DICOM files, use allow_list():
+
+```
+from dcmtag2table import replace_ids, allow_list
+
+non_phi_ct_dicom_tags = [ # These are required tags for CT. Make sure to change this when working with other modalities (MR, CR, US)
+    'PixelData',
+    'SeriesNumber',          # Number of the series within the study
+    'AcquisitionNumber',     # Number identifying the single continuous gathering of data
+    'InstanceNumber',        # Number identifying the image
+    'Modality',              # Type of equipment that created the image (CT for computed tomography)
+    'Manufacturer',          # Manufacturer of the equipment
+    'SliceThickness',        # Thickness of the slice in mm
+    'KVP',                   # Peak kilovoltage output of the X-ray tube used
+    'DataCollectionDiameter',# Diameter of the region from which data were collected
+    'SoftwareVersions',      # Software versions of the equipment
+    'ReconstructionDiameter',# Diameter within which the reconstruction is performed
+    'GantryDetectorTilt',    # Tilt of gantry with respect to the table
+    'TableHeight',           # Height of the table
+    'RotationDirection',     # Direction of rotation of the source around the patient (CW or CCW)
+    'ExposureTime',          # Time of X-ray exposure in ms
+    'XRayTubeCurrent',       # X-ray tube current in mA
+    'Exposure',              # Dose area product in mGy*cm²
+    'FilterType',            # Type of filter used
+    'GeneratorPower',        # Power of the generator used to make the exposure in kW
+    'FocalSpots',            # Size of the focal spot in mm
+    'ConvolutionKernel',     # Description of the convolution kernel or kernels used for the reconstruction
+    'PatientPosition',       # Position of the patient relative to the imaging equipment space
+    'SliceLocation',         # Location of the slice
+    'ImagePositionPatient',  # Position of the image frame in patient coordinates
+    'ImageOrientationPatient', # Orientation of the image frame in patient coordinates
+    'SamplesPerPixel',        # Number of samples (colors) in the image
+    'PhotometricInterpretation', # Photometric interpretation
+    'Rows',                   # Number of rows in the image
+    'Columns',                # Number of columns in the image
+    'PixelSpacing',           # Physical distance between the center of each pixel
+    'BitsAllocated',          # Number of bits allocated for each pixel sample
+    'BitsStored',             # Number of bits stored for each pixel sample
+    'HighBit',                # Most significant bit for pixel sample data
+    'PixelRepresentation',    # Data representation of the pixel samples
+    'WindowCenter',           # Window center for display
+    'WindowWidth',            # Window width for display
+    'RescaleIntercept',       # Value to be added to the rescaled slope intercept
+    'RescaleSlope'            # Slope for pixel value rescaling
+]
+
+df = allow_list("/mnt/d/dataset_jpr/defaced_epm/", 
+           "/mnt/c/dataset_jpr/deid_unifesp/",
+           non_phi_ct_dicom_tags,
+           start_pct=1,
+          start_study=1)
+
+# The output is a Pandas DataFrame correlating the real and fake IDs and UIDs.
+```
+
 To dump unique values from DICOM tags:
 
 ```python
