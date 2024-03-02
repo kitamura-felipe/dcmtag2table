@@ -34,7 +34,7 @@ df = df[df["SliceThickness"] <= 1.0]
 
 ```
 
-To pseudonimize DICOM files, use allow_list():
+To pseudonymize DICOM files, use allow_list():
 
 ```python
 from dcmtag2table import replace_ids, allow_list
@@ -88,7 +88,7 @@ df = allow_list("/mnt/d/dataset_jpr/defaced_epm/",
 
 # The output is a Pandas DataFrame correlating the real and fake IDs and UIDs.
 # If you delete (or don't save) that DataFrame, then the data is anonymized, since the is no way to reidentify the studies.
-# The pseudonimized files will be saved in "/mnt/c/dataset_jpr/deid_unifesp/".
+# The pseudonymized files will be saved in "/mnt/c/dataset_jpr/deid_unifesp/".
 
 ```
 
