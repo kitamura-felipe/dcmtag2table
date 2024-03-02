@@ -36,7 +36,7 @@ df = df[df["SliceThickness"] <= 1.0]
 
 To pseudonimize DICOM files, use allow_list():
 
-```
+```python
 from dcmtag2table import replace_ids, allow_list
 
 non_phi_ct_dicom_tags = [ # These are required tags for CT. Make sure to change this when working with other modalities (MR, CR, US)
