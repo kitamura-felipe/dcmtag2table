@@ -87,6 +87,9 @@ df = allow_list("/mnt/d/dataset_jpr/defaced_epm/",
           start_study=1)
 
 # The output is a Pandas DataFrame correlating the real and fake IDs and UIDs.
+# If you delete (or don't save) that DataFrame, then the data is anonymized, since the is no way to reidentify the studies.
+# The pseudonimized files will be saved in "/mnt/c/dataset_jpr/deid_unifesp/".
+
 ```
 
 To dump unique values from DICOM tags:
