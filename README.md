@@ -157,7 +157,7 @@ from dcmtag2table import get_metrics
 folder = 'dataset1'
 
 # Usage of get_metrics
-get_metrics(folder, "")
+get_metrics(folder, "transfer_logs.csv")
 
 # This will generate a dictionary as output. It will also append the dictionary to transfer_logs.csv.
 
