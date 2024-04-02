@@ -47,6 +47,7 @@ non_phi_ct_dicom_tags = [ # These are required tags for CT. Make sure to change 
     'Modality',              # Type of equipment that created the image (CT for computed tomography)
     'Manufacturer',          # Manufacturer of the equipment
     'SliceThickness',        # Thickness of the slice in mm
+    'SpacingBetweenSlices'   # the distance between two adjacent slices in millimeters, measured from the center of each slice to the center of the other slice
     'KVP',                   # Peak kilovoltage output of the X-ray tube used
     'DataCollectionDiameter',# Diameter of the region from which data were collected
     'SoftwareVersions',      # Software versions of the equipment
