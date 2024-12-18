@@ -242,7 +242,7 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
             
     return df
     
-def age_string_to_int(age_str):
+def age_string_to_int(age_str: str) -> int:
     """
     Convert an age string of format "NNL" to an integer.
     If 'L' is 'Y', remove it. If 'L' is any other letter, return 0.
@@ -263,6 +263,19 @@ def age_string_to_int(age_str):
     else:
         return int(age_str)
 
+def no_phi_age(age_str: str) -> str:
+     """
+    Convert an age string of format "NNL" to a HIPAA compliant
+    age.
+    Patients older than 89Y will be assigned to 90Y
+    
+    :param age_str: Age in string format
+    :return: Age in string format never older than 90Y
+    """
+    age_int = age_string_to_int(age_str)
+    if age_int > 89:
+        age_int = 90
+    return str(age_int) + "Y"
 
 def list_files_in_directory(directory: str) -> Set[str]:
     """
