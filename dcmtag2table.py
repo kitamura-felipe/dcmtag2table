@@ -264,7 +264,7 @@ def age_string_to_int(age_str: str) -> int:
         return int(age_str)
 
 def no_phi_age(age_str: str) -> str:
-     """
+    """
     Convert an age string of format "NNL" to a HIPAA compliant
     age.
     Patients older than 89Y will be assigned to 90Y
