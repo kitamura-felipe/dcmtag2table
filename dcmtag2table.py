@@ -331,12 +331,12 @@ def save_set_to_file(data: Set[str], file_name: str):
         for item in data:
             file.write(f"{item}\n")
 
-def dump_unique_values(directory: str):
+def dump_unique_values(directory: str, output="unique_values.txt"):
     print("Listing files")
     file_paths = list_files_in_directory(directory)
     print("Reading DICOM tags")
     dicom_tags = iterate_dicom_tags(file_paths)
-    save_set_to_file(dicom_tags, "unique_values.txt")
+    save_set_to_file(dicom_tags, output)
 
 def copy_files(df, column_name: str, folder2replace: str):
     """
