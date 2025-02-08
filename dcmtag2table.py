@@ -11,6 +11,49 @@ from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
 import time
 
+required_mg_dicom_tags = [
+
+    # General Series Module
+    "Modality",
+    "SeriesNumber",
+
+    # General Equipment Module
+    "Manufacturer",
+
+    # General Image Module
+    "ImageType",
+    "InstanceNumber",
+
+    # Image Pixel Module
+    "SamplesPerPixel",
+    "PhotometricInterpretation",
+    "Rows",
+    "Columns",
+    "BitsAllocated",
+    "BitsStored",
+    "HighBit",
+    "PixelRepresentation",
+    "PixelData",
+
+    # -- DX Image Module
+    "KVP",
+    "DistanceSourceToDetector",
+    "ExposureTime",
+    "XRayTubeCurrent",
+    "Exposure",
+    "CassetteOrientation",
+    "CassetteSize",
+    "ExposuresOnPlate",
+
+    # -- Mammography Image Module
+    "BodyPartExamined",
+    "PixelSpacing",
+    "FilterMaterial",
+    "FilterType",
+    "CompressionForce",
+    "ViewPosition"
+]
+
 
 def dcmtag2table(folder, list_of_tags):
     """
