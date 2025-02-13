@@ -54,7 +54,6 @@ non_phi_ct_dicom_tags = [ # These are required tags for CT. Make sure to change 
 ]
 
 required_mg_dicom_tags = [
-
     # General Series Module
     "Modality",
     "SeriesNumber",
@@ -94,7 +93,42 @@ required_mg_dicom_tags = [
     "FilterType",
     "CompressionForce",
     "ViewPosition",
-    "PatientOrientation"
+    "PatientOrientation",
+    "PresentationLUTShape",
+
+    # -- Newly added items from fields that were missing:
+    "DistanceSourcetoDetector",
+    "DistanceSourcetoPatient",
+    "EstimatedRadiographicMagnificationFactor",
+    "X-rayTubeCurrent",
+    "ExposureinuAs",
+    "ImagerPixelSpacing",
+    "Grid",
+    "FocalSpots",
+    "AnodeTargetMaterial",
+    "BodyPartThickness",
+    "RelativeX-rayExposure",
+    "PositionerType",
+    "PositionerPrimaryAngle",
+    "DetectorConditionsNominalFlag",
+    "DetectorTemperature",
+    "DetectorType",
+    "DetectorID",
+    "ImageLaterality",
+    "ImagesinAcquisition",
+    "SamplesperPixel",
+    "PixelPaddingValue",
+    "QualityControlImage",
+    "BurnedInAnnotation",
+    "PixelIntensityRelationship",
+    "PixelIntensityRelationshipSign",
+    "WindowCenter",
+    "WindowWidth",
+    "RescaleIntercept",
+    "RescaleSlope",
+    "RescaleType",
+    "ImplantPresent",
+    "LossyImageCompression"
 ]
 
 
