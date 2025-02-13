@@ -93,7 +93,8 @@ required_mg_dicom_tags = [
     "FilterMaterial",
     "FilterType",
     "CompressionForce",
-    "ViewPosition"
+    "ViewPosition",
+    "PatientOrientation"
 ]
 
 
