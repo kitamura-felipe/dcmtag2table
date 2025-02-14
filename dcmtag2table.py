@@ -11,6 +11,9 @@ from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
 import time
 
+# Relax the integer parsing rules
+config.enforce_valid_values = False
+
 non_phi_ct_dicom_tags = [ # These are required tags for CT. Make sure to change this when working with other modalities (MR, CR, US)
     'PixelData',
     'SeriesNumber',          # Number of the series within the study
