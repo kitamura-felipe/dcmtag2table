@@ -141,11 +141,6 @@ required_mg_dicom_tags = [
     "SpecificCharacterSet",
     "DetectorConfiguration",
     "DetectorDescription",
-    "PrivateCreator",             # (0013, 0010)
-    "PrivateTagData",            # (0013, 1010)
-    "PrivateTagData",            # (0013, 1011)
-    "PrivateTagData",            # (0013, 1012)
-    "PrivateTagData",            # (0013, 1013)
     "SOPClassUID",
     "ManufacturerModelName",
     "DistanceSourceToPatient",
