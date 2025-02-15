@@ -330,9 +330,9 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         new_ds = Dataset()
         new_ds.file_meta = FileMetaDataset()
         try:
-            new_ds.file_meta.TransferSyntaxUID = original_ds.file_meta.TransferSyntaxUID
+            new_ds.file_meta = original_ds.file_meta
         except:
-            print("No file_meta.TransferSyntaxUID found. Skipping file.")
+            print("No file_meta found. Skipping file.")
             continue
         
         # Copy only the predefined tags from the original to the new dataset
