@@ -135,7 +135,7 @@ required_mg_dicom_tags = [
     "RescaleSlope",
     "RescaleType",
     "ImplantPresent",
-    "LossyImageCompression"
+    "LossyImageCompression",
     "Sensitivity",
     "AcquisitionDeviceProcessingCode",
     "ImagesInAcquisition",
