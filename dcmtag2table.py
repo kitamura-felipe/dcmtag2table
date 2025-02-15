@@ -10,6 +10,7 @@ from datetime import datetime
 from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
 import time
+from pydicom import config
 
 # Relax the integer parsing rules
 config.enforce_valid_values = False
