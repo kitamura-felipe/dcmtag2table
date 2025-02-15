@@ -133,6 +133,41 @@ required_mg_dicom_tags = [
     "RescaleType",
     "ImplantPresent",
     "LossyImageCompression"
+    "Sensitivity",
+    "AcquisitionDeviceProcessingCode",
+    "ImagesInAcquisition",
+    "BreastImplantPresent",
+    "RelativeXRayExposure",
+    "SpecificCharacterSet",
+    "DetectorConfiguration",
+    "DetectorDescription",
+    "PrivateCreator",             # (0013, 0010)
+    "PrivateTagData",            # (0013, 1010)
+    "PrivateTagData",            # (0013, 1011)
+    "PrivateTagData",            # (0013, 1012)
+    "PrivateTagData",            # (0013, 1013)
+    "SOPClassUID",
+    "ManufacturerModelName",
+    "DistanceSourceToPatient",
+    "PositionerSecondaryAngle",
+    "DetectorActiveShape",
+    "DetectorActiveDimensions",
+    "FieldOfViewOrigin",
+    "FieldOfViewRotation",
+    "FieldOfViewHorizontalFlip",
+    "PixelAspectRatio",
+    "FieldOfViewShape",
+    "GridPeriod",
+    "PartialView",
+    "PartialViewDescription",
+    "FilterThicknessMinimum",
+    "ExposureInuAs",                # (0018, 1153)
+    "FilterThicknessMaximum",
+    "ExposureControlMode",
+    "Laterality",
+    "ExposureControlModeDescription",
+    "ExposureStatus",
+    "EthnicGroup"
 ]
 
 
