@@ -343,7 +343,7 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
 
         new_ds.PatientID = str(int(row['fake_PatientID'])).zfill(6)
         new_ds.PatientName = str(int(row['fake_PatientID'])).zfill(6)
-        new_ds.PatientBirthDate = "08/28/1919"
+        new_ds.PatientBirthDate = "08281919"
         new_ds.PatientSex = row['PatientSex']
         new_ds.PatientAge = row['PatientAge']
         new_ds.StudyID = str(int(row['fake_AccessionNumber'])).zfill(6)
@@ -353,8 +353,8 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         new_ds.SOPInstanceUID = row['fake_SOPInstanceUID']
         new_ds.file_meta.MediaStorageSOPInstanceUID = row['fake_SOPInstanceUID']
         new_ds.ProtocolName = ""
-        new_ds.StudyDate = "02/28/2024"
-        new_ds.StudyTime = "00:00:00"
+        new_ds.StudyDate = "02282025"
+        new_ds.StudyTime = "000000"
 
         
         
