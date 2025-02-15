@@ -68,6 +68,9 @@ required_mg_dicom_tags = [
     # General Image Module
     "ImageType",
     "InstanceNumber",
+    "AcquisitionNumber",
+    "SeriesDescription",
+    "StudyDescription",
 
     # Image Pixel Module
     "SamplesPerPixel",
@@ -384,10 +387,14 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         new_ds.file_meta.MediaStorageSOPInstanceUID = row['fake_SOPInstanceUID']
         new_ds.ProtocolName = ""
         new_ds.StudyDate = "20250228"
+        new_ds.SeriesDate = new_ds.StudyDate
+        new_ds.ContentDate = new_ds.StudyDate
+        new_ds.AcquisitionDate = new_ds.StudyDate
         new_ds.StudyTime = "000000"
+        new_ds.SeriesTime = new_ds.StudyTime
+        new_ds.ContentTime = new_ds.StudyTime
+        new_ds.AcquisitionTime = new_ds.StudyTime
 
-        
-        
         # Construct the new file path based on StudyID
 
         new_file_path = os.path.join(out_path, new_ds['StudyID'].value, new_ds['SOPInstanceUID'].value + ".dcm")
