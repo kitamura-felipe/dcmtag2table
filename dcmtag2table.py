@@ -293,7 +293,7 @@ def dcmtag2table_parallel(folder, list_of_tags, max_workers=4):
     # Prepend "Filename" to the list_of_tags so it aligns with the row format
     column_names = ["Filename"] + list_of_tags
     df = pd.DataFrame(rows, columns=column_names)
-
+    df = df.sort_values(by=['Filename'], ascending=True)
     print("Finished.")
     return df
 
@@ -366,6 +366,8 @@ def replace_uids_parallel_joblib(df_in: pd.DataFrame, prefix='1.2.840.1234.', n_
     # Apply mapping to the DataFrame
     for tag, mapping in results:
         df[f"fake_{tag}"] = df[tag].map(mapping)
+        
+    df = df.sort_values(by=['Filename'], ascending=True)
     
     print("Time: {:.2f} seconds".format(time.time() - start))
     return df
@@ -485,6 +487,8 @@ def replace_ids_parallel_joblib(df_in: pd.DataFrame, prefix: str, start_pct=1, s
     df["fake_StudyID"]        = df["StudyInstanceUID"].map(study_mapping)
     print("Assigning new AccessionNumbers.")
     df["fake_AccessionNumber"] = df["StudyInstanceUID"].map(study_mapping)
+
+    df = df.sort_values(by=['Filename'], ascending=True)
 
     last_patient = start_pct + len(unique_patients)
     last_study = start_study + len(unique_studies)
