@@ -220,6 +220,83 @@ def dcmtag2table(folder, list_of_tags):
     time.sleep(2)
     print("Finished.")
     return df
+import os
+import time
+import pydicom
+import pandas as pd
+from tqdm import tqdm
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+
+def _read_dicom_tags(filepath, list_of_tags):
+    """
+    Helper function to read a single DICOM file
+    and extract the requested tags.
+    Returns a list [filepath, tag1, tag2, ...] or None on failure.
+    """
+    try:
+        ds = pydicom.dcmread(filepath, stop_before_pixels=True, force=True)
+        row = [filepath]
+        for tag in list_of_tags:
+            value = ds.data_element(tag).value if tag in ds else "Not found"
+            row.append(value)
+        return row
+    except Exception:
+        # If it's not a valid DICOM or can't be read, return None
+        return None
+
+
+def dcmtag2table_parallel(folder, list_of_tags, max_workers=4):
+    """
+    Create a Pandas DataFrame with the <list_of_tags> DICOM tags
+    from the DICOM files in <folder>, in parallel.
+
+    Parameters:
+        folder (str): folder to be recursively walked looking for DICOM files.
+        list_of_tags (list of str): list of DICOM tags with no whitespaces.
+        max_workers (int): number of parallel processes to use.
+
+    Returns:
+        df (pd.DataFrame): table of DICOM tags from the files in folder.
+    """
+    list_of_tags = list_of_tags.copy()
+    filelist = []
+
+    print("Listing all files...")
+    start = time.time()
+    for root, dirs, files in os.walk(folder):
+        for name in files:
+            filelist.append(os.path.join(root, name))
+    print("Time for listing: {:.2f} seconds".format(time.time() - start))
+
+    # Prepare for parallel processing
+    print("Reading DICOM tags in parallel...")
+    start_read = time.time()
+
+    rows = []
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        # Submit jobs
+        futures = {executor.submit(_read_dicom_tags, f, list_of_tags): f for f in filelist}
+
+        # Collect results with a progress bar
+        for future in tqdm(as_completed(futures), total=len(futures)):
+            fpath = futures[future]
+            result = future.result()
+            if result is None:
+                # If reading failed, print a message (optional)
+                print(f"Skipping non-DICOM or unreadable: {fpath}")
+            else:
+                rows.append(result)
+
+    print("Time for reading: {:.2f} seconds".format(time.time() - start_read))
+
+    # Build the DataFrame
+    # Prepend "Filename" to the list_of_tags so it aligns with the row format
+    column_names = ["Filename"] + list_of_tags
+    df = pd.DataFrame(rows, columns=column_names)
+
+    print("Finished.")
+    return df
 
 def replace_uids(df_in: pd.DataFrame, prefix = '1.2.840.1234.') -> pd.DataFrame:
     """
