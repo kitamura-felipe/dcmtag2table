@@ -1,4 +1,7 @@
 import pydicom
+from pydicom import Dataset
+from pydicom.dataset import FileMetaDataset
+from pydicom import config
 from tqdm import tqdm, tqdm_notebook
 import pandas as pd
 import os
@@ -6,11 +9,7 @@ import shutil
 import time
 from typing import Set
 from datetime import datetime
-
-from pydicom import Dataset
-from pydicom.dataset import FileMetaDataset
-import time
-from pydicom import config
+from joblib import Parallel, delayed
 
 # Relax the integer parsing rules
 config.enforce_valid_values = False
