@@ -613,7 +613,127 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         new_ds.save_as(new_file_path)
             
     return df
+
+def _process_single_row(
+    index, 
+    row, 
+    out_path: str, 
+    list_of_tags: list
+):
+    """
+    Process a single row from the DataFrame: read the original DICOM,
+    copy only certain tags, anonymize / replace IDs, and write out the new DICOM.
+    """
+    original_file_path = row['Filename']
+
+    try:
+        # Read original
+        original_ds = pydicom.dcmread(original_file_path, force=True)
+    except Exception as e:
+        print(f"Failed to read DICOM {original_file_path} - {e}")
+        return
+
+    # Create new dataset
+    new_ds = Dataset()
+    new_ds.file_meta = FileMetaDataset()
+
+    # Copy file_meta if present
+    if hasattr(original_ds, 'file_meta'):
+        new_ds.file_meta = original_ds.file_meta
+
+    # Check TransferSyntaxUID
+    if 'TransferSyntaxUID' in original_ds.file_meta:
+        tsyntax = original_ds.file_meta.TransferSyntaxUID
+        new_ds.is_little_endian = tsyntax not in ["1.2.840.10008.1.2"]  # Implicit VR LE
+        new_ds.is_implicit_VR  = tsyntax in  ["1.2.840.10008.1.2"]     
+    else:
+        new_ds.is_little_endian = True
+        new_ds.is_implicit_VR  = False
+
+    # Copy only the tags we want
+    for tag in list_of_tags:
+        if tag in original_ds:
+            new_ds.add(original_ds[tag])
+
+    # Use your anonymized IDs from the row
+    new_ds.PatientID        = str(int(row['fake_PatientID'])).zfill(6)
+    new_ds.PatientName      = str(int(row['fake_PatientID'])).zfill(6)
+    new_ds.PatientBirthDate = "19190828"
+    new_ds.PatientSex       = row.get('PatientSex', 'O')  # safe fallback
+    new_ds.PatientAge       = row.get('PatientAge', '000Y')
+
+    new_ds.StudyID          = str(int(row['fake_AccessionNumber'])).zfill(6)
+    new_ds.AccessionNumber  = str(int(row['fake_AccessionNumber'])).zfill(6)
+
+    new_ds.StudyInstanceUID      = row['fake_StudyInstanceUID']
+    new_ds.SeriesInstanceUID     = row['fake_SeriesInstanceUID']
+    new_ds.SOPInstanceUID        = row['fake_SOPInstanceUID']
+    new_ds.file_meta.MediaStorageSOPInstanceUID = row['fake_SOPInstanceUID']
+
+    # Clear or set fixed fields
+    new_ds.ProtocolName = ""
+    new_ds.StudyDate    = "20250228"
+    new_ds.SeriesDate   = new_ds.StudyDate
+    new_ds.ContentDate  = new_ds.StudyDate
+    new_ds.AcquisitionDate = new_ds.StudyDate
+    new_ds.StudyTime    = "000000"
+    new_ds.SeriesTime   = new_ds.StudyTime
+    new_ds.ContentTime  = new_ds.StudyTime
+    new_ds.AcquisitionTime = new_ds.StudyTime
+
+    # Construct new file path
+    new_file_path = os.path.join(
+        out_path, 
+        new_ds.StudyID, 
+        new_ds.SOPInstanceUID + ".dcm"
+    )
+
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
+
+    # Save
+    try:
+        new_ds.save_as(new_file_path)
+    except Exception as e:
+        print(f"Failed to save DICOM {new_file_path} - {e}")
+
+
+def allow_list_parallel(
+    in_path: str, 
+    out_path: str, 
+    list_of_tags: list, 
+    start_pct=1, 
+    start_study=1,
+    max_workers=8
+):
+    """
+    Processes DICOM files to anonymize and retain only a specified list of tags,
+    saving the modified files to a new location, **in parallel**.
+    """
+    # 1) Extract DICOM tags in parallel (assuming your function already does this)
+    phi_dicom_tags = [
+        'PatientID','PatientName','PatientBirthDate','PatientSex','PatientAge',
+        'ReferringPhysicianName','StudyID','AccessionNumber','DeviceSerialNumber',
+        'StudyInstanceUID','StudyDate','StudyTime','SeriesInstanceUID','SOPInstanceUID','ProtocolName'
+    ]
+    df = dcmtag2table_parallel(in_path, phi_dicom_tags, max_workers=16)
+
+    # 2) Replace IDs in parallel (assuming your function already does this)
+    df = replace_ids_parallel_joblib(df, prefix="1.2.840.12345.", start_pct=start_pct, start_study=start_study)
     
+    # 3) Final DICOM read/modify/write in parallel
+    tasks = (
+        delayed(_process_single_row)(index, row, out_path, list_of_tags)
+        for index, row in df.iterrows()
+    )
+
+    # Optional: wrap in tqdm for a progress bar
+    Parallel(n_jobs=max_workers)(
+        tqdm(tasks, total=len(df), desc="Processing DICOMs")
+    )
+
+    return df
+
 def age_string_to_int(age_str: str) -> int:
     """
     Convert an age string of format "NNL" to an integer.
