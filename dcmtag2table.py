@@ -350,8 +350,11 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
     df = dcmtag2table(in_path, phi_dicom_tags)
 
     df = replace_ids(df, prefix="1.2.840.12345.", start_pct=start_pct, start_study=start_study)
-
+    counter = 0
     for index, row in tqdm(df.iterrows(), total=len(df)):
+        if counter < 52820:
+            continue
+        counter += 1
         original_file_path = row['Filename']
         
         # Read the original DICOM file
@@ -367,6 +370,20 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         except:
             print("No file_meta found. Skipping file.")
             continue
+        
+        if 'TransferSyntaxUID' in original_ds.file_meta:
+            tsyntax = original_ds.file_meta.TransferSyntaxUID
+            new_ds.is_little_endian = tsyntax not in [
+                "1.2.840.10008.1.2",  # Implicit VR Little Endian
+            ]
+            new_ds.is_implicit_VR = tsyntax in [
+                "1.2.840.10008.1.2",  # Implicit VR Little Endian
+            ]
+        else:
+            # Se o Transfer Syntax não estiver presente, usar valores comuns
+            new_ds.is_little_endian = True  
+            new_ds.is_implicit_VR = False  
+
         
         # Copy only the predefined tags from the original to the new dataset
         for tag in list_of_tags:
