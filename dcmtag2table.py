@@ -851,7 +851,7 @@ def dump_unique_values(directory: str, output="unique_values.txt"):
     dicom_tags = iterate_dicom_tags(file_paths)
     save_set_to_file(dicom_tags, output)
 
-def dump_unique_values_parallel(directory: str, output="unique_values.txt"):
+def dump_unique_values_parallel(directory: str, output="unique_values.txt", max_workers=8):
     """
     List DICOM files in `directory`, read them in parallel,
     accumulate all unique tag values, and save them to `output`.
@@ -864,7 +864,7 @@ def dump_unique_values_parallel(directory: str, output="unique_values.txt"):
     
     # Use a process pool to parallelize across CPU cores
     all_tags = set()
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
         # Use tqdm to show progress over the number of files
         for tag_set in tqdm(executor.map(extract_tags_from_file, file_paths),
                             total=len(file_paths), desc="Reading files"):
