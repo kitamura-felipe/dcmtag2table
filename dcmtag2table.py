@@ -470,18 +470,20 @@ def replace_ids_parallel_joblib(df_in: pd.DataFrame, prefix: str, start_pct=1, s
         df[f"fake_{tag}"] = df[tag].map(mapping)
 
     #list_of_tags = ["PatientID", "StudyID", "AccessionNumber" ]
-
+    print("Assigning new PatientIDs.")
     unique_patients = df["PatientID"].unique()
     patient_mapping = {
         pat_id: i + start_pct for i, pat_id in enumerate(unique_patients)
     }
     df["fake_PatientID"] = df["PatientID"].map(patient_mapping)
-    
+
+    print("Assigning new StudyIDs.")
     unique_studies = df["StudyInstanceUID"].unique()
     study_mapping = {
         study_uid: i + start_study for i, study_uid in enumerate(unique_studies)
     }
     df["fake_StudyID"]        = df["StudyInstanceUID"].map(study_mapping)
+    print("Assigning new AccessionNumbers.")
     df["fake_AccessionNumber"] = df["StudyInstanceUID"].map(study_mapping)
 
     last_patient = start_pct + len(unique_patients)
