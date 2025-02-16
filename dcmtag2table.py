@@ -577,7 +577,7 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         
         # Copy only the predefined tags from the original to the new dataset
         for tag in list_of_tags:
-            if tag in original_ds:
+            if hasattr(original_ds, tag):
                 new_ds.add(original_ds[tag])
 
 
