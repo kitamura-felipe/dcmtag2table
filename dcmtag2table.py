@@ -464,7 +464,7 @@ def replace_ids_parallel_joblib(df_in: pd.DataFrame, prefix: str, start_pct=1, s
 
     # Generate mapping dicts in parallel
     results = Parallel(n_jobs=n_jobs)(
-        delayed(make_mapping)(tag) for tag in tqdm(list_of_tags, desc="Generating UID maps")
+        delayed(make_mapping)(tag) for tag in tqdm(list_of_tags, desc="Generating StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID maps")
     )
     
     # Apply mapping to the DataFrame
