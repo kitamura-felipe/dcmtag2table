@@ -424,7 +424,7 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         'ProtocolName',          # Name of the protocol used for the series
     ]
 
-    df = dcmtag2table(in_path, phi_dicom_tags)
+    df = dcmtag2table_parallel(in_path, phi_dicom_tags, max_workers=16)
 
     df = replace_ids(df, prefix="1.2.840.12345.", start_pct=start_pct, start_study=start_study)
     counter = 0
