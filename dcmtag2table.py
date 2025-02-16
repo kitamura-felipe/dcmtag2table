@@ -326,6 +326,50 @@ def replace_uids(df_in: pd.DataFrame, prefix = '1.2.840.1234.') -> pd.DataFrame:
     print("Time: " + str(time.time() - start))
     return df
 
+def replace_uids_parallel_joblib(df_in: pd.DataFrame, prefix='1.2.840.1234.', n_jobs=-1) -> pd.DataFrame:
+    """
+    Parallel method using joblib to map the UID columns in a DataFrame.
+    New columns with "fake" prefix are created.
+
+    Parameters:
+        df_in (pd.DataFrame): DataFrame with the UIDs
+        prefix (str): prefix for generating new UIDs
+        n_jobs (int): number of parallel jobs (-1 = all cores)
+
+    Returns:
+        df (pd.DataFrame)
+    """
+    start = time.time()
+    df = df_in.copy()
+    
+    list_of_tags = ["StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID"]
+    
+    # Basic validation
+    for tag in list_of_tags:
+        if tag not in df.columns:
+            raise ValueError(
+                "DataFrame must have StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID columns"
+            )
+    
+    def make_mapping(tag):
+        """Generate the mapping dict for a single column."""
+        unique_vals = df[tag].unique()
+        # tqdm here if you'd like to monitor progress
+        mapping = {val: pydicom.uid.generate_uid(prefix=prefix) for val in unique_vals}
+        return tag, mapping
+
+    # Generate mapping dicts in parallel
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(make_mapping)(tag) for tag in tqdm(list_of_tags, desc="Generating UID maps")
+    )
+    
+    # Apply mapping to the DataFrame
+    for tag, mapping in results:
+        df[f"fake_{tag}"] = df[tag].map(mapping)
+    
+    print("Time: {:.2f} seconds".format(time.time() - start))
+    return df
+    
 def replace_ids(df_in: pd.DataFrame, prefix: str, start_pct=1, start_study=1) -> pd.DataFrame:
     """
     # Maps the PatientID, StudyID
@@ -352,6 +396,78 @@ def replace_ids(df_in: pd.DataFrame, prefix: str, start_pct=1, start_study=1) ->
         time.sleep(0.2)
         for _UID in tqdm(df[_tag].unique()):
             df.loc[df[_tag] == _UID, "fake_" + _tag] = pydicom.uid.generate_uid(prefix=prefix)
+
+    list_of_tags = ["PatientID", "StudyID", "AccessionNumber" ]
+
+    for _tag in list_of_tags:
+        print("Reassigning " + _tag)
+        if _tag not in df.columns:
+            raise Exception('Tags PatientID, StudyID, AccessionNumber must be columns of the DataFrame')
+        time.sleep(0.2)
+        
+        if _tag == "PatientID":
+            counter = start_pct
+            for _UID in df[_tag].unique():
+                df.loc[df[_tag] == _UID, "fake_" + _tag] = counter
+                counter += 1
+        else:
+            counter = start_study
+            for _UID in df["StudyInstanceUID"].unique():
+                df.loc[df["StudyInstanceUID"] == _UID, "fake_" + _tag] = counter
+                counter += 1        
+
+
+        if _tag == "PatientID":
+            last_patient = counter
+        elif _tag == "StudyID":
+            last_study = counter
+            
+    print("Time: " + str(time.time() - start))
+    print("Last Patient: " + str(last_patient))
+    print("Last Study: " + str(last_study))
+    return df
+
+def replace_ids_parallel_joblib(df_in: pd.DataFrame, prefix: str, start_pct=1, start_study=1, n_jobs=-1) -> pd.DataFrame:
+    """
+    # Maps the PatientID, StudyID
+    # in a Pandas DataFrame with newly generated IDs taking into account the 
+    # Patient/Study/Series/SOP hierarchy. 
+    # New columns with "Fake" prefix are created.
+
+    # Parameters:
+    #    df_in (Pandas DataFrame): DataFrame containing the three columns of UIDs
+    #    prefix (str): string containing your particular prefix.
+
+    # Returns:
+    #    df (DataFrame): with three new columns containing the new UIDs
+    """
+    start = time.time()
+    df = df_in.copy()
+    
+    list_of_tags = ["StudyInstanceUID", "SeriesInstanceUID", "SOPInstanceUID" ]
+
+    # Basic validation
+    for tag in list_of_tags:
+        if tag not in df.columns:
+            raise ValueError(
+                "DataFrame must have StudyInstanceUID, SeriesInstanceUID, and SOPInstanceUID columns"
+            )
+    
+    def make_mapping(tag):
+        """Generate the mapping dict for a single column."""
+        unique_vals = df[tag].unique()
+        # tqdm here if you'd like to monitor progress
+        mapping = {val: pydicom.uid.generate_uid(prefix=prefix) for val in unique_vals}
+        return tag, mapping
+
+    # Generate mapping dicts in parallel
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(make_mapping)(tag) for tag in tqdm(list_of_tags, desc="Generating UID maps")
+    )
+    
+    # Apply mapping to the DataFrame
+    for tag, mapping in results:
+        df[f"fake_{tag}"] = df[tag].map(mapping)
 
     list_of_tags = ["PatientID", "StudyID", "AccessionNumber" ]
 
@@ -425,7 +541,7 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
 
     df = dcmtag2table_parallel(in_path, phi_dicom_tags, max_workers=16)
 
-    df = replace_ids(df, prefix="1.2.840.12345.", start_pct=start_pct, start_study=start_study)
+    df = replace_ids_parallel_joblib(df, prefix="1.2.840.12345.", start_pct=start_pct, start_study=start_study)
     counter = 0
     for index, row in tqdm(df.iterrows(), total=len(df)):
         if counter < 52820:
