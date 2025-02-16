@@ -542,9 +542,9 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
     df = replace_ids_parallel_joblib(df, prefix="1.2.840.12345.", start_pct=start_pct, start_study=start_study)
     counter = 0
     for index, row in tqdm(df.iterrows(), total=len(df)):
-        if counter < 52820:
-            continue
-        counter += 1
+        #if counter < 52820:
+        #    continue
+        #counter += 1
         original_file_path = row['Filename']
         
         # Read the original DICOM file
