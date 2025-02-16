@@ -469,31 +469,21 @@ def replace_ids_parallel_joblib(df_in: pd.DataFrame, prefix: str, start_pct=1, s
     for tag, mapping in results:
         df[f"fake_{tag}"] = df[tag].map(mapping)
 
-    list_of_tags = ["PatientID", "StudyID", "AccessionNumber" ]
+    #list_of_tags = ["PatientID", "StudyID", "AccessionNumber" ]
 
-    for _tag in list_of_tags:
-        print("Reassigning " + _tag)
-        if _tag not in df.columns:
-            raise Exception('Tags PatientID, StudyID, AccessionNumber must be columns of the DataFrame')
-        time.sleep(0.2)
-        
-        if _tag == "PatientID":
-            counter = start_pct
-            for _UID in df[_tag].unique():
-                df.loc[df[_tag] == _UID, "fake_" + _tag] = counter
-                counter += 1
-        else:
-            counter = start_study
-            for _UID in df["StudyInstanceUID"].unique():
-                df.loc[df["StudyInstanceUID"] == _UID, "fake_" + _tag] = counter
-                counter += 1        
+    unique_patients = df["PatientID"].unique()
+    patient_mapping = {
+        pat_id: i + start_pct for i, pat_id in enumerate(unique_patients)
+    }
+    df["fake_PatientID"] = df["PatientID"].map(patient_mapping)
+    
+    unique_studies = df["StudyInstanceUID"].unique()
+    study_mapping = {
+        study_uid: i + start_study for i, study_uid in enumerate(unique_studies)
+    }
+    df["fake_StudyID"]        = df["StudyInstanceUID"].map(study_mapping)
+    df["fake_AccessionNumber"] = df["StudyInstanceUID"].map(study_mapping)
 
-
-        if _tag == "PatientID":
-            last_patient = counter
-        elif _tag == "StudyID":
-            last_study = counter
-            
     print("Time: " + str(time.time() - start))
     print("Last Patient: " + str(last_patient))
     print("Last Study: " + str(last_study))
