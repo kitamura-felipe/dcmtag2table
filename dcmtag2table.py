@@ -652,7 +652,7 @@ def _process_single_row(
 
     # Copy only the tags we want
     for tag in list_of_tags:
-        if tag in original_ds:
+        if hasattr(original_ds, tag):
             new_ds.add(original_ds[tag])
 
     # Use your anonymized IDs from the row
