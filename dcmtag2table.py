@@ -484,6 +484,8 @@ def replace_ids_parallel_joblib(df_in: pd.DataFrame, prefix: str, start_pct=1, s
     df["fake_StudyID"]        = df["StudyInstanceUID"].map(study_mapping)
     df["fake_AccessionNumber"] = df["StudyInstanceUID"].map(study_mapping)
 
+    last_patient = start_pct + len(unique_patients)
+    last_study = start_study + len(unique_studies)
     print("Time: " + str(time.time() - start))
     print("Last Patient: " + str(last_patient))
     print("Last Study: " + str(last_study))
