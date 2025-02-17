@@ -695,7 +695,7 @@ def _process_single_row(
 
     # Save
     try:
-        new_ds.save_as(new_file_path, enforce_file_format=True)
+        new_ds.save_as(new_file_path) #, enforce_file_format=True)
     except Exception as e:
         print(f"Failed to save DICOM {new_file_path} - {e}")
 
