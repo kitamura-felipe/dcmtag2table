@@ -560,7 +560,7 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
         except:
             print("No file_meta found. Skipping file.")
             continue
-        
+        '''
         if 'TransferSyntaxUID' in original_ds.file_meta:
             tsyntax = original_ds.file_meta.TransferSyntaxUID
             new_ds.is_little_endian = tsyntax not in [
@@ -573,7 +573,7 @@ def allow_list(in_path: str, out_path: str, list_of_tags: list, start_pct=1, sta
             # Se o Transfer Syntax não estiver presente, usar valores comuns
             new_ds.is_little_endian = True  
             new_ds.is_implicit_VR = False  
-
+        '''
         
         # Copy only the predefined tags from the original to the new dataset
         for tag in list_of_tags:
@@ -642,6 +642,7 @@ def _process_single_row(
         new_ds.file_meta = original_ds.file_meta
 
     # Check TransferSyntaxUID
+    '''
     if 'TransferSyntaxUID' in original_ds.file_meta:
         tsyntax = original_ds.file_meta.TransferSyntaxUID
         new_ds.is_little_endian = tsyntax not in ["1.2.840.10008.1.2"]  # Implicit VR LE
@@ -649,7 +650,8 @@ def _process_single_row(
     else:
         new_ds.is_little_endian = True
         new_ds.is_implicit_VR  = False
-
+    '''
+    
     # Copy only the tags we want
     for tag in list_of_tags:
         if hasattr(original_ds, tag):
