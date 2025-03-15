@@ -985,3 +985,7 @@ def get_metrics(folder: str, output_file: str):
     append_to_csv(output_file, summary)
     return summary
 
+def summary(df) -> None:
+    print("Total unique values per column:")
+    for _col in df.columns:
+        print(f"{_col}: {str(len(df[_col].unique()))}")
