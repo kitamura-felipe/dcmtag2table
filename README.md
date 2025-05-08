@@ -81,11 +81,12 @@ non_phi_ct_dicom_tags = [ # These are required tags for CT. Make sure to change 
     'RescaleSlope'            # Slope for pixel value rescaling
 ]
 
-df = allow_list("/mnt/d/dataset_jpr/defaced_epm/", 
+df = allow_list_parallel("/mnt/d/dataset_jpr/defaced_epm/", 
            "/mnt/c/dataset_jpr/deid_unifesp/",
            non_phi_ct_dicom_tags,
            start_pct=1,
-          start_study=1)
+           start_study=1,
+           max_workers=16)
 
 # The output is a Pandas DataFrame correlating the real and fake IDs and UIDs.
 # If you delete (or don't save) that DataFrame, then the data is anonymized, since the is no way to reidentify the studies.
@@ -98,7 +99,7 @@ To dump unique values from DICOM tags:
 ```python
 from dcmtag2table import dump_unique_values
 
-dump_unique_values('/mnt/d/exames/HeadCT/')
+dump_unique_values_parallel('/mnt/d/exames/HeadCT/')
 
 ```
 
